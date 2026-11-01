@@ -1,0 +1,83 @@
+name: Request a feature
+description: Propose a new capability for Covgate.
+title: "feat: <short description>"
+labels: [feat, triage]
+body:
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Before submitting
+      options:
+        - label: >-
+            The feature is not already proposed in
+            [open issues](https://github.com/theodiv/covgate/issues?q=is:issue+state:open).
+          required: true
+        - label: >-
+            The feature fits the project's scope: gating the modules of one
+            package on a coverage.py JSON report.
+          required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Covgate version
+      description: Output of `pip show covgate`.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Feature area
+      description: The part of Covgate the feature concerns.
+      options:
+        - Module discovery
+        - Report reading and pairing
+        - Results table
+        - Packaging
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: The capability gap, then what it costs.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: >-
+        The behavior the feature should have, in prose; no code or
+        configuration blocks.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: The workaround in use and its limitation.
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional context
+      description: Specifications or comparable tools.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: intent
+    attributes:
+      label: Contribution intent
+      options:
+        - label: >-
+            A pull request implementing this feature is planned or already in
+            progress.
+          required: false

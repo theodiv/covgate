@@ -1,0 +1,112 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Enforce code quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Create virtual environment
+        run: python -m venv --upgrade-deps .venv
+
+      - name: Install dev dependencies
+        run: .venv/bin/pip install -e . --group dev
+
+      - name: Check lint with Ruff
+        run: .venv/bin/ruff check .
+
+      - name: Check format with Ruff
+        run: .venv/bin/ruff format --check .
+
+      - name: Check types with mypy
+        run: .venv/bin/mypy src/ tests/
+
+      - name: Run pre-commit hooks
+        run: .venv/bin/pre-commit run --all-files
+        env:
+          SKIP: no-commit-to-branch
+
+  test:
+    name: Test using Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    needs: quality
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13", "3.14", "3.15"]
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Create virtual environment
+        run: python -m venv --upgrade-deps .venv
+
+      - name: Install dev dependencies
+        run: .venv/bin/pip install -e . --group dev
+
+      - name: Run test suite
+        run: .venv/bin/pytest -v --cov
+
+      - name: Upload coverage report
+        if: matrix.python-version == '3.15'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: coverage-report
+          path: coverage.json
+          retention-days: 7
+
+  ci-pass:
+    name: Require all jobs to pass
+    runs-on: ubuntu-latest
+    needs: [quality, test]
+    if: always()
+    timeout-minutes: 5
+
+    steps:
+      - name: Check every job result
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          jq -r 'to_entries[]
+            | (if .value.result == "success" then "" else "::error::" end)
+              + "Job \(.key) ended with result \(.value.result)"' <<< "$NEEDS"
+          if ! jq -e 'all(.[]; .result == "success")' <<< "$NEEDS" > /dev/null; then
+            exit 1
+          fi

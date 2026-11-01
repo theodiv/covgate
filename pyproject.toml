@@ -1,0 +1,110 @@
+[project]
+name = "covgate"
+description = "Per-module code coverage gate for coverage.py and pytest-cov"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Theodosios Divolis" }]
+keywords = [
+  "coverage",
+  "coverage-gate",
+  "coverage-threshold",
+  "coverage.py",
+  "fail-under",
+  "per-file-coverage",
+  "per-module-coverage",
+  "pytest-cov",
+  "quality-gate",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
+]
+dependencies = []
+dynamic = ["version"]
+
+[project.urls]
+"Bug Tracker" = "https://github.com/theodiv/covgate/issues"
+Changelog = "https://github.com/theodiv/covgate/blob/main/CHANGELOG.md"
+Repository = "https://github.com/theodiv/covgate"
+
+[dependency-groups]
+dev = [
+  "mypy==2.4.1",
+  "pre-commit==4.7.0",
+  "pytest==9.2.0",
+  "pytest-cov==7.1.0",
+  "ruff==0.17.3",
+]
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.coverage.run]
+branch = true
+source_pkgs = ["covgate"]
+
+[tool.coverage.report]
+fail_under = 95
+
+[tool.hatch.version]
+path = "src/covgate/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/covgate"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+mypy_path = "src"
+warn_unreachable = true
+enable_error_code = ["ignore-without-code"]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+warn_unreachable = false
+warn_return_any = false
+disallow_untyped_decorators = false
+
+[tool.pytest.ini_options]
+addopts = "--cov-report=term-missing --cov-report=json"
+filterwarnings = ["error"]
+strict = true
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 88
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["B", "D", "E", "F", "G", "I", "PGH", "PL", "PT", "RUF", "S", "T20", "TID", "UP", "W"]
+extend-select = ["D401", "D404", "TRY002"]
+ignore = ["D105", "D107", "PLR2004"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D100", "D101", "D102", "D104", "E741", "PLC0415", "PLR0913", "PLR0917", "S101", "S105", "S106", "S311", "S603"]
+"tests/**/test_*.py" = ["D103"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"os.chmod".msg = "Use os.fchmod on the open descriptor."
+
+[tool.ruff.lint.pylint]
+max-returns = 8
+max-args = 6
+
+[tool.ruff.lint.pycodestyle]
+ignore-overlong-task-comments = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
