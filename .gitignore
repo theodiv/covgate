@@ -1,3 +1,24 @@
+# Build and distribution
+dist/
+build/
+*.egg-info/
+
+# Bytecode
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+.venv/
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+coverage.json
+
+# Tool caches
+.mypy_cache/
+.ruff_cache/
+
 # Editors and operating systems
 .idea/
 .vscode/

@@ -1,0 +1,85 @@
+name: Report a bug
+description: >-
+  Report a defect in Covgate. Security vulnerabilities must be reported
+  via GitHub's private advisory feature, not this form.
+title: "bug: <short description>"
+labels: [bug, triage]
+body:
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Before submitting
+      options:
+        - label: >-
+            The issue is not already reported in
+            [open issues](https://github.com/theodiv/covgate/issues?q=is:issue+state:open).
+          required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Covgate version
+      description: Output of `pip show covgate`.
+    validations:
+      required: true
+
+  - type: input
+    id: python_version
+    attributes:
+      label: Python version
+      description: Output of `python3 --version`.
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: Ubuntu 24.04 LTS (Noble Numbat)
+    validations:
+      required: true
+
+  - type: input
+    id: installation_method
+    attributes:
+      label: Installation method
+      placeholder: pip, pipx, or a local clone
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: The observed behavior, then the expected behavior.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: >-
+        The smallest command line, with the input, that shows the defect with
+        the installed package.
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Observed output
+      description: >-
+        The output, log lines, or error line, exactly as written, with
+        secrets and personal data replaced with `REDACTED`.
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional context
+      description: Anything a maintainer cannot infer.
+    validations:
+      required: false

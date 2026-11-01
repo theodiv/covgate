@@ -1,0 +1,49 @@
+name: Pull Request Title Validation
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  main:
+    name: Validate PR title
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check title type and scope
+        uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50  # v6.1.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            refactor
+            test
+            docs
+            chore
+            perf
+            ci
+          scopes: |
+            model
+            settings
+            disk
+            report
+            render
+            cli
+            build
+          requireScope: false
+
+      - name: Check title length
+        if: github.event.pull_request.user.login != 'dependabot[bot]'
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          if [ "${#PR_TITLE}" -gt 68 ]; then
+            echo "::error::PR title is ${#PR_TITLE} characters; the limit is 68"
+            exit 1
+          fi
